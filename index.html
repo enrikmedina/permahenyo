@@ -207,7 +207,8 @@
      the game screens rotate 90° so they always play sideways */
   html.rot #ready,html.rot #count,html.rot #play,html.rot #results{
     top:0;left:0;right:auto;bottom:auto;
-    width:100vh;height:100vw;
+    /* fallback; JS overrides with exact innerWidth/innerHeight px (see updateOrient) */
+    width:100dvh;height:100dvw;
     transform:rotate(90deg) translateY(-100%);
     transform-origin:top left;
   }
@@ -630,11 +631,24 @@ $("homeBtn").onclick=()=>{buildHome();show("home");};
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 
 /* ---------- forced landscape ---------- */
+// When the phone is physically portrait (even rotation-locked), the game screens
+// rotate 90°. Size them with the REAL viewport pixels instead of 100vh/100vw —
+// some browsers (e.g. Samsung Internet, tall aspect ratios) report vh/vw that don't
+// match the actual viewport, which left an uncovered strip on the play screens.
+const ROT_SCREENS=["ready","count","play","results"];
 function updateOrient(){
-  document.documentElement.classList.toggle("rot", window.innerHeight>window.innerWidth);
+  const w=window.innerWidth, h=window.innerHeight;
+  const rot=h>w;
+  document.documentElement.classList.toggle("rot", rot);
+  ROT_SCREENS.forEach(id=>{
+    const el=$(id);
+    if(rot){ el.style.width=h+"px"; el.style.height=w+"px"; }
+    else { el.style.width=""; el.style.height=""; }
+  });
 }
 window.addEventListener("resize",updateOrient);
 window.addEventListener("orientationchange",updateOrient);
+if(window.visualViewport)window.visualViewport.addEventListener("resize",updateOrient);
 updateOrient();
 
 buildHome();
