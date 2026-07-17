@@ -1,5 +1,5 @@
 // Network-first with cache fallback: always fresh online, fully playable offline.
-const CACHE = "permahenyo-v2";
+const CACHE = "permahenyo-v3";
 const PRECACHE = ["./", "./index.html", "./icon-192.png", "./icon-512.png", "./manifest.webmanifest"];
 
 self.addEventListener("install", e => {

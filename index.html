@@ -632,14 +632,18 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 
 /* ---------- forced landscape ---------- */
 // When the phone is physically portrait (even rotation-locked), the game screens
-// rotate 90°. Size them with the REAL viewport pixels instead of 100vh/100vw —
-// some browsers (e.g. Samsung Internet, tall aspect ratios) report vh/vw that don't
-// match the actual viewport, which left an uncovered strip on the play screens.
+// rotate 90°. They are position:fixed, so they cover the LAYOUT viewport — measure
+// it with documentElement.clientWidth/Height, NOT window.innerWidth/innerHeight.
+// window.inner* is the VISUAL viewport, which on Samsung Internet / Chrome shrinks
+// while the browser toolbar is showing; sizing from it left the rotated box short of
+// the edge, uncovering a strip of the body gradient. clientWidth/Height is defined as
+// the layout viewport, so the numbers we feed always match the surface we cover.
 const ROT_SCREENS=["ready","count","play","results"];
 function updateOrient(){
-  const w=window.innerWidth, h=window.innerHeight;
+  const de=document.documentElement;
+  const w=de.clientWidth, h=de.clientHeight;
   const rot=h>w;
-  document.documentElement.classList.toggle("rot", rot);
+  de.classList.toggle("rot", rot);
   ROT_SCREENS.forEach(id=>{
     const el=$(id);
     if(rot){ el.style.width=h+"px"; el.style.height=w+"px"; }
